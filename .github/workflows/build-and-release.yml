@@ -1,0 +1,140 @@
+name: Build and Release BulkFileOrganizer
+
+on:
+  push:
+    branches:
+      - main
+      - action-test
+    paths-ignore: # Ignore pushes that only change project files
+      - '**.csproj'
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Install dependencies
+        run: dotnet restore
+
+      - name: Fetch all tags
+        run: git fetch --tags
+
+      - name: Calculate number of additions
+        id: calculate_additions
+        shell: bash
+        run: |
+          # Check if there is a previous commit
+          if git rev-parse HEAD^ >/dev/null 2>&1; then
+            # Calculate additions if there is a previous commit
+            additions=$(git diff --shortstat HEAD^ HEAD | awk '{print $4}')
+          else
+            # Default to 0 additions if no previous commit
+            additions=0
+          fi
+          echo "additions=$additions" >> $GITHUB_ENV
+
+      - name: Determine version increment
+        id: determine_increment
+        shell: bash
+        run: |
+          if [ "${{ env.additions }}" -gt 100 ]; then
+            echo "increment=minor" >> $GITHUB_ENV
+          else
+            echo "increment=patch" >> $GITHUB_ENV
+          fi
+
+      - name: Get next version
+        uses: reecetech/version-increment@2024.4.3
+        id: version
+        with:
+          scheme: semver
+          increment: ${{ env.increment }}
+
+      - name: Update assembly version & re-commit
+        shell: bash
+        run: |
+          new_version="${{ steps.version.outputs.version }}"
+          echo "Updating version to $new_version"
+          sed -i "s/<Version>.*<\/Version>/<Version>${new_version}<\/Version>/" BulkFileOrganizer.csproj
+          last_commit_message=$(git log -1 --pretty=%B)
+          original_committer_name=$(git log -1 --pretty=format:'%an')
+          original_committer_email=$(git log -1 --pretty=format:'%ae')
+          combined_message="v$new_version: ${last_commit_message} [skip ci]"
+          git config --global user.name "$original_committer_name"
+          git config --global user.email "$original_committer_email"
+          git diff --exit-code --quiet || (git commit -am "$combined_message" && git push)
+
+      - name: Build and publish (cross-platform)
+        run: |
+          dotnet publish -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:PublishTrimmed=true -o ./publish/win-x64
+          dotnet publish -c Release -r linux-x64 --self-contained true -p:PublishSingleFile=true -p:PublishTrimmed=true -o ./publish/linux-x64
+          dotnet publish -c Release -r osx-x64 --self-contained true -p:PublishSingleFile=true -p:PublishTrimmed=true -o ./publish/osx-x64
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: BulkFileOrganizer
+          path: |
+            ./publish/win-x64/BulkFileOrganizer.exe
+            ./publish/linux-x64/BulkFileOrganizer
+            ./publish/osx-x64/BulkFileOrganizer
+
+      - name: Create Git tag
+        run: |
+          git tag ${{ steps.version.outputs.version }}
+          git push origin ${{ steps.version.outputs.version }}
+
+      - name: Create GitHub Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ steps.version.outputs.version }}
+          release_name: v${{ steps.version.outputs.version }}
+          draft: false
+          prerelease: false
+
+      - name: Upload release asset (Windows)
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./publish/win-x64/BulkFileOrganizer.exe
+          asset_name: BulkFileOrganizer-win-x64.exe
+          asset_content_type: application/octet-stream
+
+      - name: Upload release asset (Linux)
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./publish/linux-x64/BulkFileOrganizer
+          asset_name: BulkFileOrganizer-linux-x64
+          asset_content_type: application/octet-stream
+
+      - name: Upload release asset (macOS x64)
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./publish/osx-x64/BulkFileOrganizer
+          asset_name: BulkFileOrganizer-osx-x64
+          asset_content_type: application/octet-stream
+
+      - name: Test
+        run: dotnet test --no-restore --verbosity normal
