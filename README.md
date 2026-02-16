@@ -11,7 +11,8 @@
 
 ## About the Project
 
-...
+BulkFileOrganizer is a high-performance .NET CLI that bulk copies or moves files into evenly distributed, organized bucket directories for easier storage and management.
+Can be used when managing extremely large numbers of files; the CLI will redistribute them into buckets to reduce filesystem slowdowns.
 
 ## Usage
 
