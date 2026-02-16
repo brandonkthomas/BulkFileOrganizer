@@ -82,15 +82,18 @@ jobs:
           dotnet publish -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:PublishTrimmed=true -o ./publish/win-x64
           dotnet publish -c Release -r linux-x64 --self-contained true -p:PublishSingleFile=true -p:PublishTrimmed=true -o ./publish/linux-x64
           dotnet publish -c Release -r osx-x64 --self-contained true -p:PublishSingleFile=true -p:PublishTrimmed=true -o ./publish/macos-x64
+          mv ./publish/win-x64/BulkFileOrganizer.exe ./publish/win-x64/BulkFileOrganizer-win-x64.exe
+          mv ./publish/linux-x64/BulkFileOrganizer ./publish/linux-x64/BulkFileOrganizer-linux-x64
+          mv ./publish/macos-x64/BulkFileOrganizer ./publish/macos-x64/BulkFileOrganizer-macos-x64
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: BulkFileOrganizer
           path: |
-            ./publish/win-x64/BulkFileOrganizer.exe
-            ./publish/linux-x64/BulkFileOrganizer
-            ./publish/macos-x64/BulkFileOrganizer
+            ./publish/win-x64/BulkFileOrganizer-win-x64.exe
+            ./publish/linux-x64/BulkFileOrganizer-linux-x64
+            ./publish/macos-x64/BulkFileOrganizer-macos-x64
 
       - name: Create Git tag
         run: |
@@ -107,9 +110,9 @@ jobs:
           draft: false
           prerelease: false
           files: |
-            ./publish/win-x64/BulkFileOrganizer.exe
-            ./publish/linux-x64/BulkFileOrganizer
-            ./publish/macos-x64/BulkFileOrganizer
+            ./publish/win-x64/BulkFileOrganizer-win-x64.exe
+            ./publish/linux-x64/BulkFileOrganizer-linux-x64
+            ./publish/macos-x64/BulkFileOrganizer-macos-x64
 
       - name: Test
         run: dotnet test --no-restore --verbosity normal
