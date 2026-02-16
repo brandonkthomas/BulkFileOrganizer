@@ -14,13 +14,15 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Setup .NET
-        uses: actions/setup-dotnet@v3
+        uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '8.0.x'
 
@@ -55,7 +57,7 @@ jobs:
           fi
 
       - name: Get next version
-        uses: reecetech/version-increment@2024.4.3
+        uses: reecetech/version-increment@2024.10.1
         id: version
         with:
           scheme: semver
@@ -95,46 +97,19 @@ jobs:
           git tag ${{ steps.version.outputs.version }}
           git push origin ${{ steps.version.outputs.version }}
 
-      - name: Create GitHub Release
-        id: create_release
-        uses: actions/create-release@v1
+      - name: Create GitHub Release and upload assets
+        uses: softprops/action-gh-release@v2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           tag_name: ${{ steps.version.outputs.version }}
-          release_name: v${{ steps.version.outputs.version }}
+          name: v${{ steps.version.outputs.version }}
           draft: false
           prerelease: false
-
-      - name: Upload release asset (Windows)
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./publish/win-x64/BulkFileOrganizer.exe
-          asset_name: BulkFileOrganizer-win-x64.exe
-          asset_content_type: application/octet-stream
-
-      - name: Upload release asset (Linux)
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./publish/linux-x64/BulkFileOrganizer
-          asset_name: BulkFileOrganizer-linux-x64
-          asset_content_type: application/octet-stream
-
-      - name: Upload release asset (macOS x64)
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./publish/macos-x64/BulkFileOrganizer
-          asset_name: BulkFileOrganizer-macos-x64
-          asset_content_type: application/octet-stream
+          files: |
+            ./publish/win-x64/BulkFileOrganizer.exe
+            ./publish/linux-x64/BulkFileOrganizer
+            ./publish/macos-x64/BulkFileOrganizer
 
       - name: Test
         run: dotnet test --no-restore --verbosity normal
