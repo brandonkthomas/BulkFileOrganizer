@@ -31,8 +31,14 @@ Optional:
   --queue     Bounded queue capacity. Default = 10000
   --progress  Print progress every N processed/enumerated items. Default = 10000
   --test      Generate N empty files in the input directory (with the chosen extension) before processing.
-
-Notes:
-  - Files are evenly distributed into hex-named bucket directories (0000, 0001, ...) based on the total file count.
-  - Name collisions are resolved by appending a short hash suffix.
 ```
+
+## Notes
+
+- Files are evenly distributed into hex-named bucket directories (0000, 0001, ...) based on the total file count.
+- Name collisions are resolved by appending a short hash suffix.
+
+## Releases
+
+Releases are built and published automatically on each commit to the `main` branch.
+They are available as self-contained executables for Windows, Linux, and macOS.
