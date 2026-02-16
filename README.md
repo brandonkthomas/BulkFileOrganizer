@@ -12,12 +12,13 @@
 ## About the Project
 
 BulkFileOrganizer is a high-performance .NET CLI that bulk copies or moves files into evenly distributed, organized bucket directories for easier storage and management.
+
 Can be used when managing extremely large numbers of files; the CLI will redistribute them into buckets to reduce filesystem slowdowns.
 
 ## Usage
 
 ```text
-  BulkFileOrganizer --ext <extension> --input <dir> --output <dir> [--action copy|move] [--depth N] [--workers N] [--queue N] [--progress N] [--test N]
+BulkFileOrganizer --ext <extension> --input <dir> --output <dir> [--action copy|move] [--depth N] [--workers N] [--queue N] [--progress N] [--test N]
 
 Required:
   --ext      File extension to include (e.g. .jpg or jpg). Case-insensitive.
@@ -41,4 +42,5 @@ Optional:
 ## Releases
 
 Releases are built and published automatically on each commit to the `main` branch.
+
 They are available as self-contained executables for Windows, Linux, and macOS.
