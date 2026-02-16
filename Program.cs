@@ -392,9 +392,17 @@ internal static class Program
 
             return failed > 0 ? 2 : 0;
         }
+        catch (ArgumentException ex)
+        {
+            Console.WriteLine($"Error: {ex.Message}");
+            Console.WriteLine();
+            PrintUsage();
+            return 1;
+        }
         catch (Exception ex)
         {
             Console.WriteLine(ex.ToString());
+            Console.WriteLine();
             PrintUsage();
             return 1;
         }
@@ -498,13 +506,36 @@ internal static class Program
 
     // --------------------------------------------------------------------------------------------
     /// <summary>
+    /// Get the current executable name (file name only)
+    /// </summary>
+    /// <returns></returns>
+    private static string GetExecutableName()
+    {
+        try
+        {
+            var processPath = Environment.ProcessPath;
+            if (!string.IsNullOrEmpty(processPath))
+                return Path.GetFileName(processPath);
+        }
+        catch
+        {
+            // fall back below
+        }
+
+        return AppDomain.CurrentDomain.FriendlyName;
+    }
+
+    // --------------------------------------------------------------------------------------------
+    /// <summary>
     /// Print usage
     /// </summary>
     private static void PrintUsage()
     {
-        Console.WriteLine(@"
+        var exeName = GetExecutableName();
+
+        Console.WriteLine($@"
 Usage:
-  BulkFileOrganizer --ext <extension> --input <dir> --output <dir> [--action copy|move] [--depth N] [--workers N] [--queue N] [--progress N] [--test N]
+  {exeName} --ext <extension> --input <dir> --output <dir> [--action copy|move] [--depth N] [--workers N] [--queue N] [--progress N] [--test N]
 
 Required:
   --ext      File extension to include (e.g. .jpg or jpg). Case-insensitive.
