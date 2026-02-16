@@ -17,7 +17,6 @@ Can be used when managing extremely large numbers of files; the CLI will redistr
 ## Usage
 
 ```text
-Usage:
   BulkFileOrganizer --ext <extension> --input <dir> --output <dir> [--action copy|move] [--depth N] [--workers N] [--queue N] [--progress N] [--test N]
 
 Required:
