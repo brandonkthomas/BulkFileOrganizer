@@ -504,7 +504,7 @@ internal static class Program
     {
         Console.WriteLine(@"
 Usage:
-  SplitFiles.exe --ext <extension> --input <dir> --output <dir> [--action copy|move] [--depth N] [--workers N] [--queue N] [--progress N] [--test N]
+  BulkFileOrganizer --ext <extension> --input <dir> --output <dir> [--action copy|move] [--depth N] [--workers N] [--queue N] [--progress N] [--test N]
 
 Required:
   --ext      File extension to include (e.g. .jpg or jpg). Case-insensitive.

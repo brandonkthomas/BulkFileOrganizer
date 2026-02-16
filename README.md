@@ -12,3 +12,27 @@
 ## About the Project
 
 ...
+
+## Usage
+
+```text
+Usage:
+  BulkFileOrganizer --ext <extension> --input <dir> --output <dir> [--action copy|move] [--depth N] [--workers N] [--queue N] [--progress N] [--test N]
+
+Required:
+  --ext      File extension to include (e.g. .jpg or jpg). Case-insensitive.
+  --input    Root directory to search recursively.
+  --output   Output root directory. Evenly sized bucket directories are created under this.
+
+Optional:
+  --action    copy (default) or move
+  --depth     Max recursion depth. -1 (default) = infinite. 0 = only input directory.
+  --workers   Number of parallel workers. Default = CPU/2
+  --queue     Bounded queue capacity. Default = 10000
+  --progress  Print progress every N processed/enumerated items. Default = 10000
+  --test      Generate N empty files in the input directory (with the chosen extension) before processing.
+
+Notes:
+  - Files are evenly distributed into hex-named bucket directories (0000, 0001, ...) based on the total file count.
+  - Name collisions are resolved by appending a short hash suffix.
+```
