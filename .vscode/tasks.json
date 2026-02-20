@@ -6,12 +6,36 @@
         "command": "dotnet",
         "type": "process",
         "args": [
-          "build",
-          "${workspaceFolder}/BulkFileOrganizer.csproj",
-          "/property:GenerateFullPaths=true",
-          "/consoleloggerparameters:NoSummary"
+            "build",
+            "${workspaceFolder}/BulkFileOrganizer.csproj",
+            "/property:GenerateFullPaths=true",
+            "/consoleloggerparameters:NoSummary;ForceNoAlign"
         ],
         "problemMatcher": "$msCompile"
-      }
+    },
+    {
+        "label": "publish",
+        "command": "dotnet",
+        "type": "process",
+        "args": [
+            "publish",
+            "${workspaceFolder}/BulkFileOrganizer.csproj",
+            "/property:GenerateFullPaths=true",
+            "/consoleloggerparameters:NoSummary;ForceNoAlign"
+        ],
+        "problemMatcher": "$msCompile"
+    },
+    {
+        "label": "watch",
+        "command": "dotnet",
+        "type": "process",
+        "args": [
+            "watch",
+            "run",
+            "--project",
+            "${workspaceFolder}/BulkFileOrganizer.csproj"
+        ],
+        "problemMatcher": "$msCompile"
+    }
     ]
 }
